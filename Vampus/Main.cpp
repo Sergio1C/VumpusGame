@@ -6,11 +6,12 @@ int main(int argc, char* argv[])
 	char choise;
 
 	do {
-		VampusGame* ptrGame = new VampusGame;
-		ptrGame->Action();
-		ptrGame->~VampusGame();
+		system("cls");
+		VumpusGame* pGame = new VumpusGame;
+		pGame->Action();
+		pGame->~VumpusGame();
 
-		std::cout << "VampusGame is over.Retry?";
+		std::cout << "\nGame is over.Retry? (y,n)";
 		std::cin >> choise;
 
 	} while (choise == 'y');

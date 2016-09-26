@@ -8,9 +8,10 @@
 
 const int MAX_ROUTE = 3; //количество туннелей между комнатами 
 int MAX_AMMO = 5;		 //количество стрел у игрока в начале игры
+const int MAX_ROOM_FOR_AMMO = 5; // количество комнат, которое пролетает стрела при выстреле
 
 /*
-Класс Room. Room - место, в которм находится персонаж. 
+Room - место, в котором находится персонаж. 
 Каждая комната соединена тремя путями с соседними.
 Локация состоит из 20 комнат, соединенных друг с другом.
 */
@@ -46,22 +47,24 @@ public:
 
 };
 
+/*
+Person - базовый класс для персонажей игры.
+Vumpus,Player - производные. Смотри соотв. классы.
+*/
 class Person 
 {
 public:
 	Person();
-	//virtual ~Person();
 	Room* Position = nullptr;
 	virtual void Move(Room* To) { Position = To;}
 };
 
-Person::Person()
-{}
+Person::Person(){}
 
-class Vampus : public Person
+class Vumpus : public Person
 {
 public:
-	Vampus() : Person() {};
+	Vumpus() : Person() {};
 	virtual void Move() { Position = RandomRoute(Position); }
 };
 
@@ -69,41 +72,28 @@ class Player : public Person
 {
 public:
 	Player() : Person() {};
-	void Shoot();
-protected:
+	int getAmmo() const { return ammo; }
+	void IncreaseAmmo() { ammo--; };
+private:
 	int ammo = MAX_AMMO;
 };
 
-/*Выстрел игрока - 
-1.запрос номеров комнат, которое должна пролететь стрела
-2.стрела не может возвратиться к игроку
-3. если указана комната при (1), не связанная туннелем с предыдущей, то стрела улетает в случайную комнату
-*/
-
-void Player::Shoot()
-{
-	while (1)
-	{
-		std::cout <<
-	}
-};
-
 bool CreateRoute(Room* One, Room* Two);
-bool IsRoute(Room* One, Room* Two);
+bool IsRoute(const Room* One, const Room* Two);
 
-class VampusGame
+class VumpusGame
 {
 public:
-	VampusGame();
-	~VampusGame();
-	Vampus Vampus;
+	VumpusGame();
+	~VumpusGame();
+	Vumpus Vumpus;
 	Player Player;
-
 	void Action();
-
 	void PrintRooms() const;
+	void Shoot();
 private:
 	void CreateMap();
+	bool GameOver = 0;
 
 protected:
 	std::vector<Room*> Rooms;
@@ -125,14 +115,14 @@ protected:
 
 };
 
-VampusGame::VampusGame()
+VumpusGame::VumpusGame()
 {
 	CreateMap();
-	Vampus.Position = RandomRoom();
+	Vumpus.Position = RandomRoom();
 	Player.Position = RandomRoom();
 }
 
-VampusGame::~VampusGame()
+VumpusGame::~VumpusGame()
 {
 	std::vector<Room*>::iterator it;
 	for (it = Rooms.begin(); it != Rooms.end(); ++it)
@@ -141,183 +131,11 @@ VampusGame::~VampusGame()
 	}
 }
 
-void VampusGame::Action()
-{
-	char action;
-	int number;
-	
-	while (1)
-	{
-		if (!Check()) break;
-		
-	std::cout << "You rooms:" << Player.Position << std::endl;
-	std::cout << "Nearest rooms:" << Player.Position->route[0] << " " << Player.Position->route[1] << " " << Player.Position->route[2] << std::endl;
-	std::cout << "Shoot or move (s,m)?:" << std::endl;
-	std::cin >> action;
-		switch (action)
-		{
-		case 'm':
-		{
-			std::cout << "You move in:";
-			std::cin >> number;
-			if (IsRoute(Player.Position, Rooms.at(number - 1)))
-			{
-				Player.Move(Rooms.at(number - 1));
-				Vampus.Move();
-				break;
-			}
-		}
-		case 's':
-		{
-			Player.Shoot();
-			if (!Check()) break;
-			Vampus.Move();
 
-		}
-		default: 
-		{
-			std::cout << "Wrong input, try again:";
-			continue;
-		}
-		}
-	}
 
-}
 
-void VampusGame::PrintRooms() const
-{
-	std::ostringstream ss;
-	std::vector<Room*>::const_iterator it;
-	for (it = Rooms.begin(); it != Rooms.end(); ++it)
-	{
-		ss << "("<<(*it)->number<<")->";
-		for (int i = 0; i < 3; i++)
-		{
-			Room* route = (*it)->route[i];
-			if (route) ss <<route->number<<" ";
-		}
-	}
-	
-	ss << std::endl;
-	//А вот так очищаем поток ss
-	std::cout << ss.str();
-	ss.str("");
-	ss.flush();
 
-}
 
-void VampusGame::CreateMap()
-{
-	//Строим уровень, состоящий из 20 комнат
-	//Соединяем первые 5 комнат
-	Room* prevRooms = nullptr;
-	
-	for (int num = 1; num <= 5; num++)
-	{
-		Rooms.push_back(new Room(num));
-		if (prevRooms)
-		{
-			CreateRoute(prevRooms, Rooms.back());		
-		}		
-			prevRooms = Rooms.back();
-	}
-	CreateRoute(prevRooms, Rooms.front());
 
-	prevRooms = nullptr;
-	//Соединяем следующие 10 комнат
-	for (int num = 6; num <= 15; num++)
-	{
-		Rooms.push_back(new Room(num));
-		if (prevRooms)
-		{
-			CreateRoute(prevRooms, Rooms.back());
-		}
-			prevRooms = Rooms.back();
-	}
-	CreateRoute(prevRooms, Rooms.at(5));
-	
-	prevRooms = nullptr;
-	//Соединяем последние 5 комнат
-	for (int num = 16; num <= 20; num++)
-	{
-		Rooms.push_back(new Room(num));
-		if (prevRooms)
-		{
-			CreateRoute(prevRooms, Rooms.back());
-		}
-		prevRooms = Rooms.back();
-	}
-	CreateRoute(prevRooms, Rooms.at(15));
 
-	prevRooms = nullptr;
-	//Соединяем комнаты 3 маршрутом друг с другом
-	for (std::vector<Room*>::iterator it = Rooms.begin(); it < Rooms.end(); ++it)
-	{
-		if ((*it)->AllRoute()) continue;
-		for (std::vector<Room*>::iterator it2 = it+1; it2 < Rooms.end(); ++it2)
-		{
-			if ((*it2)->AllRoute()) continue;
-			if (IsRoute((*it), (*it2))) continue;
-			CreateRoute((*it), (*it2));
-			break;
-		}
-			
-	};
-	//Расставляем случайно ямы в 2 случайные комнаты
-	RandomRoom()->hole = true;
-	RandomRoom()->hole = true;
-}
 
-bool VampusGame::Check()
-{
-	if (Player.Position->hole) //мы попали в комнату с ямой
-	{
-		std::cout << "Oops...you are in hole.Game over!" << std::endl;
-		return 0;
-	}
-	if (Player.Position->route[0]->hole || Player.Position->route[1]->hole || Player.Position->route[2]->hole)
-	{ 
-		std::cout << "I feel a breeze..." << std::endl;
-	}
-	if (Player.Position == Vampus.Position) //нас съедает Vampus
-	{
-		std::cout << "Oops...You ate the Vampus.Game Over!" << std::endl;
-		return 0;
-	}
-	if (Player.Position->route[0] == Vampus.Position || Player.Position->route[1] == Vampus.Position
-		|| Player.Position->route[2] == Vampus.Position)
-	{ 
-		std::cout << "I feel a Vampus!" << std::endl;
-	}
-
-	return 1;
-}
-
-//addition metods
-
-bool CreateRoute(Room* One, Room* Two)
-{
-	for (int i = 0; i < 3; i++)
-	{
-		if (One->route[i]) continue;
-		
-			for (int j = 0; j < 3; j++)
-			{
-				if (Two->route[j]) continue;
-				
-				One->route[i] = Two;
-				Two->route[j] = One;
-				return 1;
-			}	
-	}
-	return 0;
-}
-
-bool IsRoute(Room* One, Room* Two)
-{
-	for (int i = 0; i < 3; i++)
-	{
-		if ((One->route[i] == Two) || (Two->route[i] == One)) return 1;
-	}
-	return 0;
-}
