@@ -7,7 +7,7 @@
 #include <random>
 
 const int MAX_ROUTE = 3; //количество туннелей между комнатами 
-int MAX_AMMO = 5;		 //количество стрел у игрока в начале игры
+const int MAX_AMMO = 5;		 //количество стрел у игрока в начале игры
 const int MAX_ROOM_FOR_AMMO = 5; // количество комнат, которое пролетает стрела при выстреле
 
 /*
@@ -40,7 +40,7 @@ public:
 	}
 	friend Room* RandomRoute(const Room* Room)
 	{
-		srand(time(0));
+		srand((unsigned)time(0));
 		int random_num = rand() % 2;
 		return Room->route[random_num];
 	}
@@ -54,12 +54,10 @@ Vumpus,Player - производные. Смотри соотв. классы.
 class Person 
 {
 public:
-	Person();
+	Person() {};
 	Room* Position = nullptr;
 	virtual void Move(Room* To) { Position = To;}
 };
-
-Person::Person(){}
 
 class Vumpus : public Person
 {
@@ -115,21 +113,6 @@ protected:
 
 };
 
-VumpusGame::VumpusGame()
-{
-	CreateMap();
-	Vumpus.Position = RandomRoom();
-	Player.Position = RandomRoom();
-}
-
-VumpusGame::~VumpusGame()
-{
-	std::vector<Room*>::iterator it;
-	for (it = Rooms.begin(); it != Rooms.end(); ++it)
-	{
-		delete *it;
-	}
-}
 
 
 

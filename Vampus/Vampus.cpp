@@ -1,5 +1,21 @@
 #include "Vampus.h"
 
+VumpusGame::VumpusGame()
+{
+	CreateMap();
+	Vumpus.Position = RandomRoom();
+	Player.Position = RandomRoom();
+}
+
+VumpusGame::~VumpusGame()
+{
+	std::vector<Room*>::iterator it;
+	for (it = Rooms.begin(); it != Rooms.end(); ++it)
+	{
+		delete *it;
+	}
+}
+
 void VumpusGame::CreateMap()
 {
 	//—троим уровень, состо€щий из 20 комнат
@@ -240,7 +256,7 @@ void VumpusGame::Shoot()
 	}
 
 	const Room* ArrowRoom = nullptr;
-	for (auto i = 0; i < ArrowRoute.size(); i++)
+	for (int i = 0; i < ArrowRoute.size(); i++)
 	{
 		//если комната не св€зана с предыдущей, стрела летит в случайную клетку.
 		//остальной маршрут прекращаем.
