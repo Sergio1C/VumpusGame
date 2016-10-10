@@ -1,6 +1,6 @@
 # VumpusGame
-"Hunt the Vumpus" Game
+"Hunt the Wumpus" Game
 
-this is simple implementation a "Hunt the vumpus game" (https://en.wikipedia.org/wiki/Hunt_the_Wumpus).
+this is simple implementation a "Hunt the Wumpus game" (https://en.wikipedia.org/wiki/Hunt_the_Wumpus).
 language - C++
 compilate - Microsoft
